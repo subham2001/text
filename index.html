@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Messaging App with Profiles</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 50px; }
+    ul { list-style-type: none; padding: 0; }
+    li { padding: 8px; margin-bottom: 10px; background: #f1f1f1; border-radius: 5px; }
+    input { padding: 10px; width: 80%; margin-right: 10px; }
+    button { padding: 10px; }
+    #usernameForm { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Messaging App</h1>
+  
+  <!-- Username Form -->
+  <form id="usernameForm">
+    <input id="username" placeholder="Enter your name" autocomplete="off" required />
+    <button>Join Chat</button>
+  </form>
+
+  <!-- Chat area -->
+  <ul id="messages"></ul>
+  <form id="messageForm" action="" style="display:none;">
+    <input id="message" autocomplete="off" placeholder="Type a message" /><button>Send</button>
+  </form>
+
+  <!-- Include Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    var username = '';
+
+    // Handle the submission of the username form
+    document.getElementById('usernameForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      username = document.getElementById('username').value;
+      document.getElementById('usernameForm').style.display = 'none';
+      document.getElementById('messageForm').style.display = 'block';
+    });
+
+    // When a new message is received, append it with the sender's name
+    socket.on('chat message', function(data) {
+      var item = document.createElement('li');
+      item.textContent = data.username + ': ' + data.msg;
+      document.getElementById('messages').appendChild(item);
+    });
+
+    // Handle message submission with the username attached
+    document.getElementById('messageForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var input = document.getElementById('message');
+      socket.emit('chat message', { username: username, msg: input.value });
+      input.value = '';
+    });
+  </script>
+</body>
+</html>
