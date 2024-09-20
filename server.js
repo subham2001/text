@@ -1,33 +1,28 @@
 const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+const path = require('path');
+
+// Middleware to parse URL-encoded data
+app.use(express.urlencoded({ extended: true }));
 
 // Serve the HTML file
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+    res.sendFile(path.join(__dirname, 'index.html')); // Adjust the path if needed
 });
 
-// Handle socket connections and messages
-io.on('connection', (socket) => {
-  console.log('A user connected');
+// Handle form submission
+app.post('/send-message', (req, res) => {
+    const { name, message } = req.body;
 
-  // Handle receiving a message and broadcast it
-  socket.on('chat message', (data) => {
-    io.emit('chat message', data); // Broadcast the message with the username
-  });
+    // Do something with the name and message (e.g., log it)
+    console.log(`Name: ${name}, Message: ${message}`);
 
-  // Handle user disconnection
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
+    // Send a response back to the user
+    res.send(`Message from ${name}: "${message}" has been received!`);
 });
 
-// Start the server on port 3000
+// Start the server
 const PORT = 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
